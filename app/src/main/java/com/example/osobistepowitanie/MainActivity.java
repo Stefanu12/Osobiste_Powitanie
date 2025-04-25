@@ -14,9 +14,7 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.NotificationCompat;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String CHANNEL_ID = "kanal";
@@ -27,10 +25,8 @@ public class MainActivity extends AppCompatActivity {
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_main);
 
+        createNotificationChannel();
         EditText editText = findViewById(R.id.editTextImie);
-
-
-
         Button but1 = findViewById(R.id.buttonPowitanie);
         but1.setOnClickListener(v -> {
             String imie = editText.getText().toString().trim();
@@ -40,8 +36,6 @@ public class MainActivity extends AppCompatActivity {
                 AlertDialog2(imie);
             }
         });
-
-
     }
     private void AlertDialog(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -52,7 +46,6 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Toast.makeText(MainActivity.this,"OK",Toast.LENGTH_LONG).show();
-
             }
         });
         builder.create().show();
@@ -65,17 +58,43 @@ public class MainActivity extends AppCompatActivity {
         builder.setPositiveButton("Tak, poproszę", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MainActivity.this,"OK",Toast.LENGTH_LONG).show();
-
+                Toast.makeText(MainActivity.this,"Powiadomienie zostało wysłane!",Toast.LENGTH_LONG).show();
+                pow(imie);
             }
         });
         builder.setNegativeButton("Nie, dziękuję", new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                Toast.makeText(MainActivity.this,"kliknięto Anuluj",Toast.LENGTH_LONG).show();
+                Toast.makeText(MainActivity.this,"Rozumiem. Nie wysyłam powiadomienia.",Toast.LENGTH_LONG).show();
             }
         });
         builder.create().show();
+    }
+
+    private void createNotificationChannel() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            NotificationChannel channel = new NotificationChannel(
+                    CHANNEL_ID, "kanal",
+                    NotificationManager.IMPORTANCE_DEFAULT
+            );
+            NotificationManager manager = getSystemService(NotificationManager.class);
+            manager.createNotificationChannel(channel);
+        }
+    }
+
+    private void pow(String imie) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                .setSmallIcon(android.R.drawable.ic_dialog_info)
+                .setContentTitle("Witaj!")
+                .setContentText("Miło Cię widzieć," + imie)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+        pokaz(builder);
+    }
+
+    private void pokaz(NotificationCompat.Builder builder) {
+        NotificationManager manager = (NotificationManager)
+                getSystemService(Context.NOTIFICATION_SERVICE);
+        manager.notify((int) System.currentTimeMillis(), builder.build());
     }
 
 }
